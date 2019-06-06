@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+
+<launch>
+
+	<!-- launch the mocap, make sure to edit the mocap config to have the bebops -->
+<!--
+	<include file="$(find mocap_optitrack)/launch/mocap.launch"/>
+-->
+
+  <node pkg="odom_estimator" type="odom_node" name="odom_node" output="screen">
+    <rosparam param="names"> ["turtlebot3"] </rosparam>
+  </node>
+
+</launch>
