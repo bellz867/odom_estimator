@@ -30,5 +30,10 @@ int main(int argc, char** argv)
   spinner.start();
   ros::waitForShutdown();
 
+  for (int ii = 0; ii < odomEstimators.size(); ii++)
+  {
+    delete odomEstimators.at(ii);
+  }
+
   return 0;
 }

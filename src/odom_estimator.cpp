@@ -3,7 +3,7 @@
 OdomEstimator::OdomEstimator(std::string nameInit)
 {
 	name = nameInit;
-	poseSub = nh.subscribe(name+"/mocapPose",1,&OdomEstimator::poseCB,this);
+	poseSub = nh.subscribe(name,1,&OdomEstimator::poseCB,this);
 	odomPub = nh.advertise<nav_msgs::Odometry>(name+"/odomEKF",1);
 	velPub = nh.advertise<geometry_msgs::TwistStamped>(name+"/velEKF",1);
 	firstMocap = true;
@@ -38,23 +38,23 @@ OdomEstimator::OdomEstimator(std::string nameInit)
 	H.block(3,3,4,4) = Eigen::Matrix4f::Identity();
 	HT = H.transpose();
 
-	float qwwang = -M_PI/2.0;
-	qww = Eigen::Vector4f(cos(qwwang/2.0),-sin(qwwang/2.0),0.0,0.0);
-	qww /= qww.norm();
+	// float qwwang = -M_PI/2.0;
+	// qww = Eigen::Vector4f(cos(qwwang/2.0),-sin(qwwang/2.0),0.0,0.0);
+	// qww /= qww.norm();
 }
 
 void OdomEstimator::poseCB(const geometry_msgs::PoseStamped::ConstPtr& msg)
 {
 	//ros::Time t = msg->header.stamp;
-	ros::Time t = ros::Time::now();
+	ros::Time t = msg->header.stamp;
 	std::string frame_id = msg->header.frame_id;
 	Eigen::Vector3f p(msg->pose.position.x,msg->pose.position.y,msg->pose.position.z);
 	Eigen::Vector4f q(msg->pose.orientation.w,msg->pose.orientation.x,msg->pose.orientation.y,msg->pose.orientation.z);
 	q /= q.norm();
 
-	p = rotatevec(p,qww);
-	q = getqMat(qww)*q;
-	q /= q.norm();
+	// p = rotatevec(p,qww);
+	// q = getqMat(qww)*q;
+	// q /= q.norm();
 
 	Eigen::Matrix<float,7,1> z;
 	z.segment(0,3) = p;
