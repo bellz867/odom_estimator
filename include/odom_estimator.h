@@ -25,9 +25,10 @@ struct OdomEstimator
 	bool firstMocap;
 	Eigen::Matrix<float,13,1> xHat;
 	Eigen::Matrix<float,13,13> P;
-	Eigen::Matrix<float,13,13> Q;
+	Eigen::Matrix<float,12,12> Q;
 	Eigen::Matrix<float,7,7> R;
 	Eigen::Matrix<float,13,13> F;
+	Eigen::Matrix<float,13,12> L;
 	Eigen::Matrix<float,7,13> H;
 	Eigen::Matrix<float,13,7> HT;
 	Eigen::Vector4f qww;

@@ -9,28 +9,32 @@ OdomEstimator::OdomEstimator(std::string nameInit)
 	firstMocap = true;
 	xHat = Eigen::Matrix<float,13,1>::Zero();
 	P = Eigen::Matrix<float,13,13>::Zero();
-	Q = Eigen::Matrix<float,13,13>::Zero();
+	Q = Eigen::Matrix<float,12,12>::Zero();
 
 	//position variance
-	P.block(0,0,3,3) = 0.001*Eigen::Matrix3f::Identity();//covariance
+	P.block(0,0,3,3) = 0.1*Eigen::Matrix3f::Identity();//covariance
+	R.block(0,0,3,3) = 0.000001*Eigen::Matrix3f::Identity();//measurment covariance
 	Q.block(0,0,3,3) = 0.0001*Eigen::Matrix3f::Identity();//process covariance
-	R.block(0,0,3,3) = 0.0001*Eigen::Matrix3f::Identity();//measurment covariance
 
-	//oriatnation variance
-	P.block(3,3,4,4) = 0.0001*Eigen::Matrix4f::Identity();//covariance
-	Q.block(3,3,4,4) = 0.00001*Eigen::Matrix4f::Identity();//process covariance
-	R.block(3,3,4,4) = 0.00001*Eigen::Matrix4f::Identity();//measurment covariance
+	//orientation variance
+	P.block(3,3,4,4) = 0.1*Eigen::Matrix4f::Identity();//covariance
+	R.block(3,3,4,4) = 0.000001*Eigen::Matrix4f::Identity();//measurment covariance
+	Q.block(3,3,3,3) = 0.0001*Eigen::Matrix3f::Identity();//process covariance
 
 	//linear velocity variance
 	P.block(7,7,3,3) = 0.1*Eigen::Matrix3f::Identity();//covariance
-	Q.block(7,7,3,3) = 0.05*Eigen::Matrix3f::Identity();//process covariance
+	Q.block(6,6,3,3) = 0.0001*Eigen::Matrix3f::Identity();//process covariance
 
 	//angular velocity variance
 	P.block(10,10,3,3) = 0.1*Eigen::Matrix3f::Identity();//covariance
-	Q.block(10,10,3,3) = 0.05*Eigen::Matrix3f::Identity();//process covariance
+	Q.block(9,9,3,3) = 0.0001*Eigen::Matrix3f::Identity();//process covariance
 
 	//process jacobian
+	// F = Eigen::Matrix<float,13,13>::Identity();
 	F = Eigen::Matrix<float,13,13>::Identity();
+
+	//noise jacobian
+	L = Eigen::Matrix<float,13,12>::Zero();
 
 	//measruement jacobian
 	H = Eigen::Matrix<float,7,13>::Zero();
@@ -76,24 +80,36 @@ void OdomEstimator::poseCB(const geometry_msgs::PoseStamped::ConstPtr& msg)
 	float dt = (t-tLast).toSec();
 	tLast = t;
 
+	std::cout << "dt " << dt << std::endl;
+
 	F.block(0,7,3,3) = dt*Eigen::Matrix3f::Identity();
 	F.block(3,3,4,4) = Eigen::Matrix4f::Identity() + 0.5*dt*partialqDotq(xHat.segment(10,3));
 	F.block(3,10,4,3) = 0.5*dt*partialqDotw(xHat.segment(3,4));
+	
+	L.block(0,0,3,3) = dt*Eigen::Matrix3f::Identity();
+	L.block(3,3,4,3) = 0.5*dt*partialqDotw(xHat.segment(3,4));
+	L.block(7,6,3,3) = dt*Eigen::Matrix3f::Identity();
+	L.block(10,9,3,3) = dt*Eigen::Matrix3f::Identity();
 
 	//predict
 	// std::cout << std::endl << "+++++++++++++++++" << std::endl;
-	 //std::cout << "\n dt " << dt <<std::endl;
-	 //std::cout << "\n F \n" << F <<std::endl;
-	 
-	 //std::cout << "\n xHat \n" << xHat <<std::endl;
-	 //std::cout << "\n xDot(xHat) \n" << xDot(xHat) <<std::endl;
+	//std::cout << "\n dt " << dt <<std::endl;
+	std::cout << "\n F \n" << F <<std::endl;
+	std::cout << "\n L \n" << L <<std::endl;
+	
+	//std::cout << "\n xHat \n" << xHat <<std::endl;
+	//std::cout << "\n xDot(xHat) \n" << xDot(xHat) <<std::endl;
 	xHat += (xDot(xHat)*dt);
 	// xHat.segment(3,4) /= xHat.segment(3,4).norm();
 	// // P += ((F*P + P*F.transpose() + Q)*dt);
-	P = (F*P*F.transpose() + Q);
+	P = (F*P*F.transpose() + L*Q*L.transpose());
 	//
 	// std::cout << "\n F \n" << F <<std::endl;
-	// std::cout << "\n P \n" << P <<std::endl;
+	std::cout << "\n P \n" << P <<std::endl;
+
+	std::cout << "\n state cov \n" << F*P*F.transpose() <<std::endl;
+	std::cout << "\n noise cov \n" << L*Q*L.transpose() <<std::endl;
+	
 
 	Eigen::Matrix<float,7,7> argK = H*P*HT+R;
 	// std::cout << "\n argK \n" << argK <<std::endl;
@@ -110,11 +126,22 @@ void OdomEstimator::poseCB(const geometry_msgs::PoseStamped::ConstPtr& msg)
 
 	// std::cout << std::endl << xHat.segment(0,7) << std::endl;
 	// std::cout << std::endl << P << std::endl;
-	xHat += (K*(z-xHat.segment(0,7)));
 
-	// std::cout << std::endl << "----------------" << std::endl;
-	// xHat.segment(3,4) /= xHat.segment(3,4).norm();
-	P = (Eigen::Matrix<float,13,13>::Identity() - K*H)*P;
+	//perform chi squared test to make sure measurement okay
+	Eigen::Matrix<float,7,1> error = z-xHat.segment(0,7);
+	float chiTest = error.transpose()*argKI*error;
+	float chi2 = 6.63; //chi^2 for 99%
+
+	std::cout << "chi test value " << chiTest << std::endl;
+	//if okay then use
+	// if (chiTest < chi2)
+	if (true)
+	{
+		xHat += (K*error);
+		// std::cout << std::endl << "----------------" << std::endl;
+		// xHat.segment(3,4) /= xHat.segment(3,4).norm();
+		P = (Eigen::Matrix<float,13,13>::Identity() - K*H)*P;
+	}
 
 	Eigen::Vector4f qHat = xHat.segment(3,4)/xHat.segment(3,4).norm();
 	Eigen::Vector3f vBody = rotatevec(xHat.segment(7,3),getqInv(qHat));
@@ -234,7 +261,7 @@ Eigen::Matrix4f OdomEstimator::partialqDotq(Eigen::Vector3f w)
 	pqDotq(2,3) = w(0);
 	pqDotq(3,0) = w(2);
 	pqDotq(3,1) = w(1);
-	pqDotq(3,0) = -w(0);
+	pqDotq(3,2) = -w(0);
 	return pqDotq;
 }
 

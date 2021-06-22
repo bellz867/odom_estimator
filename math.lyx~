@@ -1,0 +1,194 @@
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+X\left(k+1\right)=X\left(k\right)+dt*f\left(k\right)
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\dot{p}=v
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\dot{q}=\frac{1}{2}B\left(q\right)w
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+B\left(q\right)=\begin{bmatrix}-q_{x} & -q_{y} & -q_{z}\\
+q_{w} & -q_{z} & q_{y}\\
+q_{z} & q_{w} & -q_{x}\\
+-q_{y} & q_{x} & q_{w}
+\end{bmatrix}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\dot{q}=\frac{1}{2}\begin{bmatrix}-q_{x}w_{x}-q_{y}w_{y}-q_{z}w_{z}\\
+q_{w}w_{x}-q_{z}w_{y}+q_{y}w_{z}\\
+q_{z}w_{x}+q_{w}w_{y}-q_{x}w_{z}\\
+-q_{y}w_{x}+q_{x}w_{y}+q_{w}w_{z}
+\end{bmatrix}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+f=\begin{bmatrix}v_{x}\\
+v_{y}\\
+v_{z}\\
+\frac{1}{2}\left(-q_{x}w_{x}-q_{y}w_{y}-q_{z}w_{z}\right)\\
+\frac{1}{2}\left(q_{w}w_{x}-q_{z}w_{y}+q_{y}w_{z}\right)\\
+\frac{1}{2}\left(q_{z}w_{x}+q_{w}w_{y}-q_{x}w_{z}\right)\\
+\frac{1}{2}\left(-q_{y}w_{x}+q_{x}w_{y}+q_{w}w_{z}\right)\\
+0\\
+0\\
+0\\
+0\\
+0\\
+0
+\end{bmatrix}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+l=\begin{bmatrix}\tilde{v}_{x}\\
+\tilde{v}_{y}\\
+\tilde{v}_{z}\\
+\frac{1}{2}\left(-q_{x}\tilde{w}_{x}-q_{y}\tilde{w}_{y}-q_{z}\tilde{w}_{z}\right)\\
+\frac{1}{2}\left(q_{w}\tilde{w}_{x}-q_{z}\tilde{w}_{y}+q_{y}\tilde{w}_{z}\right)\\
+\frac{1}{2}\left(q_{z}\tilde{w}_{x}+q_{w}\tilde{w}_{y}-q_{x}\tilde{w}_{z}\right)\\
+\frac{1}{2}\left(-q_{y}\tilde{w}_{x}+q_{x}\tilde{w}_{y}+q_{w}\tilde{w}_{z}\right)\\
+0\\
+0\\
+0\\
+0\\
+0\\
+0
+\end{bmatrix}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\frac{\partial f}{\partial X}=\begin{bmatrix}0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0\\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0\\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0\\
+0 & 0 & 0 & 0 & \frac{1}{2}\left(-w_{x}\right) & \frac{1}{2}\left(-w_{y}\right) & \frac{1}{2}\left(-w_{z}\right) & 0 & 0 & 0 & \frac{1}{2}\left(-q_{x}\right) & \frac{1}{2}\left(-q_{y}\right) & \frac{1}{2}\left(-q_{z}\right)\\
+0 & 0 & 0 & \frac{1}{2}\left(w_{x}\right) & 0 & \frac{1}{2}\left(w_{z}\right) & \frac{1}{2}\left(-w_{y}\right) & 0 & 0 & 0 & \frac{1}{2}\left(q_{w}\right) & \frac{1}{2}\left(-q_{z}\right) & \frac{1}{2}\left(q_{y}\right)\\
+0 & 0 & 0 & \frac{1}{2}\left(w_{y}\right) & \frac{1}{2}\left(-w_{z}\right) & 0 & \frac{1}{2}\left(w_{x}\right) & 0 & 0 & 0 & \frac{1}{2}\left(q_{z}\right) & \frac{1}{2}\left(q_{w}\right) & \frac{1}{2}\left(-q_{x}\right)\\
+0 & 0 & 0 & \frac{1}{2}\left(w_{z}\right) & \frac{1}{2}\left(w_{y}\right) & \frac{1}{2}\left(-w_{x}\right) & 0 & 0 & 0 & 0 & \frac{1}{2}\left(-q_{y}\right) & \frac{1}{2}\left(q_{x}\right) & \frac{1}{2}\left(q_{w}\right)\\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0
+\end{bmatrix}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
