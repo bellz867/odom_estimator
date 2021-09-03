@@ -2,7 +2,7 @@
 
 <launch>
   <node pkg="odom_estimator" type="odom_node" name="odom_node">
-    <rosparam param="names"> ["/rail/nwu/pose_stamped","/bugstomper/nwu/pose_stamped"] </rosparam>
+    <rosparam param="names"> ["/rail/nwu/pose_stamped","/sulaco/nwu/pose_stamped"] </rosparam>
     <!-- <rosparam param="names"> ["/rail/nwu/pose_stamped"] </rosparam> -->
   </node>
 
