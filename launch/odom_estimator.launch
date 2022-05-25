@@ -1,9 +1,15 @@
 <?xml version="1.0"?>
 
 <launch>
+  <arg name="record_bag" default="true"/>
+  <arg name="bag_name" default="test"/>
+
   <node pkg="odom_estimator" type="odom_node" name="odom_node">
     <rosparam param="names"> ["/rail/nwu/pose_stamped","/sulaco/nwu/pose_stamped"] </rosparam>
     <!-- <rosparam param="names"> ["/rail/nwu/pose_stamped"] </rosparam> -->
   </node>
+
+  <node if="$(arg record_bag)" name="record" pkg="rosbag" type="record" args="-aO $(arg bag_name) "/>
+
 
 </launch>

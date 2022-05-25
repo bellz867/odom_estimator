@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   std_msgs
   nav_msgs
+        sensor_msgs
 )
 
 #add_message_files(
