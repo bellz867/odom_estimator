@@ -9,7 +9,7 @@
     <!-- <rosparam param="names"> ["/rail/nwu/pose_stamped"] </rosparam> -->
   </node>
 
-  <node if="$(arg record_bag)" name="record" pkg="rosbag" type="record" args="-aO $(arg bag_name) "/>
+  <node if="$(arg record_bag)" name="record" pkg="rosbag" type="record" args="-O $(arg bag_name) rail/nwu/pose_stamped /rail/nwu/pose_stamped/odomEKF /rail/nwu/pose_stamped/velEKF /sulaco/nwu/pose_stamped/odomEKF /sulaco/nwu/pose_stamped/velEKF penguin/nwu/pose_stamped"/>
 
 
 </launch>

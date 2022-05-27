@@ -122,6 +122,11 @@ void OdomEstimator::MocapPoseCB(const geometry_msgs::PoseStamped::ConstPtr &msg)
 
 void OdomEstimator::ArucoposeCB(const geometry_msgs::PoseStamped::ConstPtr& msg)
 {
+
+    if(abs(z(0,1)) <= 0.25) {
+        std::cout<<"Occlusion Measurement"<<std::endl;
+        return;
+    }
 	//ros::Time t = msg->header.stamp;
 	ros::Time t = msg->header.stamp;
 	std::string frame_id = msg->header.frame_id;
