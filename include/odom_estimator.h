@@ -24,6 +24,7 @@ struct OdomEstimator
 	ros::Subscriber cameraInfoSub;
 	ros::Publisher odomPub;
 	ros::Publisher velPub;
+	ros::Publisher measurePub;
 	ros::Time tLast;
 	bool firstMocap;
 	bool initialized;

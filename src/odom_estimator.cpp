@@ -11,12 +11,12 @@ OdomEstimator::OdomEstimator(std::string nameInit) : initialized(false)
 
 	//position variance
 	P.block(0,0,3,3) = 0.1*Eigen::Matrix3f::Identity();//covariance
-	R.block(0,0,3,3) = 0.000001*Eigen::Matrix3f::Identity();//measurment covariance
+	R.block(0,0,3,3) = 0.0001*Eigen::Matrix3f::Identity();//measurment covariance
 	Q.block(0,0,3,3) = 0.0001*Eigen::Matrix3f::Identity();//process covariance
 
 	//orientation variance
 	P.block(3,3,4,4) = 0.1*Eigen::Matrix4f::Identity();//covariance
-	R.block(3,3,4,4) = 0.000001*Eigen::Matrix4f::Identity();//measurment covariance
+	R.block(3,3,4,4) = 0.01*Eigen::Matrix4f::Identity();//measurment covariance
 	Q.block(3,3,3,3) = 0.0001*Eigen::Matrix3f::Identity();//process covariance
 
 	//linear velocity variance
@@ -56,6 +56,7 @@ OdomEstimator::OdomEstimator(std::string nameInit) : initialized(false)
     cameraInfoSub = nh.subscribe("/camera/color/camera_info",1,&OdomEstimator::cameraInfoCB,this);
     odomPub = nh.advertise<nav_msgs::Odometry>(name+"/odomEKF",1);
     velPub = nh.advertise<geometry_msgs::TwistStamped>(name+"/velEKF",1);
+    measurePub = nh.advertise<geometry_msgs::PoseStamped>("/is_updating",1);
 
 	// float qwwang = -M_PI/2.0;
 	// qww = Eigen::Vector4f(cos(qwwang/2.0),-sin(qwwang/2.0),0.0,0.0);
@@ -84,8 +85,8 @@ void OdomEstimator::cameraInfoCB(const sensor_msgs::CameraInfoConstPtr &msg) {
     //predict
     // std::cout << std::endl << "+++++++++++++++++" << std::endl;
     //std::cout << "\n dt " << dt <<std::endl;
-    std::cout << "\n F \n" << F <<std::endl;
-    std::cout << "\n L \n" << L <<std::endl;
+//    std::cout << "\n F \n" << F <<std::endl;
+//    std::cout << "\n L \n" << L <<std::endl;
 
     //std::cout << "\n xHat \n" << xHat <<std::endl;
     //std::cout << "\n xDot(xHat) \n" << xDot(xHat) <<std::endl;
@@ -95,10 +96,10 @@ void OdomEstimator::cameraInfoCB(const sensor_msgs::CameraInfoConstPtr &msg) {
     P = (F*P*F.transpose() + L*Q*L.transpose());
     //
     // std::cout << "\n F \n" << F <<std::endl;
-    std::cout << "\n P \n" << P <<std::endl;
+//    std::cout << "\n P \n" << P <<std::endl;
 
-    std::cout << "\n state cov \n" << F*P*F.transpose() <<std::endl;
-    std::cout << "\n noise cov \n" << L*Q*L.transpose() <<std::endl;
+//    std::cout << "\n state cov \n" << F*P*F.transpose() <<std::endl;
+//    std::cout << "\n noise cov \n" << L*Q*L.transpose() <<std::endl;
     tLast = t;
 
     publish_state();
@@ -122,8 +123,7 @@ void OdomEstimator::MocapPoseCB(const geometry_msgs::PoseStamped::ConstPtr &msg)
 
 void OdomEstimator::ArucoposeCB(const geometry_msgs::PoseStamped::ConstPtr& msg)
 {
-
-    if(abs(z(0,1)) <= 0.25) {
+    if(abs(z(1,0)) <= 0.25) {
         std::cout<<"Occlusion Measurement"<<std::endl;
         return;
     }
@@ -131,7 +131,7 @@ void OdomEstimator::ArucoposeCB(const geometry_msgs::PoseStamped::ConstPtr& msg)
 	ros::Time t = msg->header.stamp;
 	std::string frame_id = msg->header.frame_id;
 
-
+//    ROS_WARN_STREAM("IN HERE 134");
 
 	// p = rotatevec(p,qww);
 	// q = getqMat(qww)*q;
@@ -152,8 +152,7 @@ void OdomEstimator::ArucoposeCB(const geometry_msgs::PoseStamped::ConstPtr& msg)
 	float dt = (t-tLast).toSec();
 	tLast = t;
 
-	std::cout << "dt " << dt << std::endl;
-
+//	std::cout << "dt " << dt << std::endl;
 	Eigen::Matrix<float,7,7> argK = H*P*HT+R;
 	// std::cout << "\n argK \n" << argK <<std::endl;
 	Eigen::JacobiSVD<Eigen::MatrixXf> svdargK(argK, Eigen::ComputeThinU | Eigen::ComputeThinV);
@@ -161,7 +160,6 @@ void OdomEstimator::ArucoposeCB(const geometry_msgs::PoseStamped::ConstPtr& msg)
 	// std::cout << "\n argKI \n" << argKI <<std::endl;
 	Eigen::Matrix<float,13,7> K = P*HT*argKI;
 	// std::cout << "\n K \n" << K <<std::endl;
-
 	// std::cout << "\n z \n" << z <<std::endl;
 	// std::cout << "\n xHat \n" << xHat.segment(0,7) <<std::endl;
 	// std::cout << "\n z-xHat \n" << (z-xHat.segment(0,7)) <<std::endl;
@@ -174,12 +172,17 @@ void OdomEstimator::ArucoposeCB(const geometry_msgs::PoseStamped::ConstPtr& msg)
 	Eigen::Matrix<float,7,1> error = z-xHat.segment(0,7);
 	float chiTest = error.transpose()*argKI*error;
 	float chi2 = 6.63; //chi^2 for 99%
-
-	std::cout << "chi test value " << chiTest << std::endl;
+//	std::cout << "chi test value " << chiTest << std::endl;
 	//if okay then use
 	// if (chiTest < chi2)
 	if (true)
 	{
+        geometry_msgs::PoseStamped measure;
+        measure.header.stamp=t;
+        measure.pose.position.x=0;
+        measure.pose.position.y=0;
+        measure.pose.position.z=0;
+	    measurePub.publish(measure);
 		xHat += (K*error);
 		// std::cout << std::endl << "----------------" << std::endl;
 		// xHat.segment(3,4) /= xHat.segment(3,4).norm();

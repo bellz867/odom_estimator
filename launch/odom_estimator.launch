@@ -4,12 +4,12 @@
   <arg name="record_bag" default="true"/>
   <arg name="bag_name" default="test"/>
 
-  <node pkg="odom_estimator" type="odom_node" name="odom_node">
+  <node pkg="odom_estimator" type="odom_node" name="odom_node" output="screen">
     <rosparam param="names"> ["/rail/nwu/pose_stamped","/sulaco/nwu/pose_stamped"] </rosparam>
     <!-- <rosparam param="names"> ["/rail/nwu/pose_stamped"] </rosparam> -->
   </node>
 
-  <node if="$(arg record_bag)" name="record" pkg="rosbag" type="record" args="-O $(arg bag_name) rail/nwu/pose_stamped /rail/nwu/pose_stamped/odomEKF /rail/nwu/pose_stamped/velEKF /sulaco/nwu/pose_stamped/odomEKF /sulaco/nwu/pose_stamped/velEKF penguin/nwu/pose_stamped"/>
+  <node if="$(arg record_bag)" name="record" pkg="rosbag" type="record" args="-O $(arg bag_name) rail/nwu/pose_stamped /rail/nwu/pose_stamped/odomEKF /rail/nwu/pose_stamped/velEKF /sulaco/nwu/pose_stamped/odomEKF /sulaco/nwu/pose_stamped/velEKF /is_updating penguin/nwu/pose_stamped"/>
 
 
 </launch>
